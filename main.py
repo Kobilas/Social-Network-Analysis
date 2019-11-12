@@ -1,4 +1,5 @@
 from itertools import islice
+import heap
 
 # nodeId.edges : The edges in the ego network for the node 'nodeId'. Edges are
 #   undirected for facebook, and directed (a follows b) for twitter and gplus.
