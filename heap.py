@@ -1,8 +1,11 @@
 # from cpython.heapq
 class Heap:
   
-    def __init__(self):
-        lst = []
+    def __init__(self, L = None):
+        if L != None:
+            lst = L
+        else:
+            lst = []
   
     def getLength(self):
         return len(self.lst)
@@ -26,6 +29,18 @@ class Heap:
             self._siftup(0)
             return ret
         return endval
+    
+    def heappoppush(self, newvalue):
+        ret = self.getValue(0)
+        self.setValue(0, newvalue)
+        self._siftup(0)
+        return ret
+    
+    def heappushpop(self, newvalue):
+        if self.lst and self.getValue(0) < newvalue:
+            newvalue, self.lst[0] = self.lst[0], newvalue
+            self._siftup(0)
+        return newitem
     
     def heapify(self):
         n = self.getLength()

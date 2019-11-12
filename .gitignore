@@ -4,3 +4,4 @@
 *.featnames
 *.egofeat
 *.txt
+*.pyc
