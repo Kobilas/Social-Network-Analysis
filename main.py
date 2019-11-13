@@ -36,13 +36,31 @@ def createGraphFromFile(filePath):
       egoGraph[ln[0]] = [ln[1]]
   return egoGraph
 
-#def get100BiggestInfluencers(L):
+def get100BiggestInfluencers(L):
+    followerCount = {}
+    for account in L:
+        if account in followerCount:
+            followerCount[account] += 1
+        else:
+            followerCount[account] = 1
+    hp = heap.heap()
+    for key in followerCount:
+        hp.insert(heap.node(key, followerCount[key]))
+    ret = []
+    for i in range(100):
+        ret.append(hp.extractMax())
+    return ret
     
     
 def main(filePath):
   twitterGraph = createGraphFromFile(filePath)
   print(take(1, twitterGraph.items()))
-  print(list(twitterGraph.values())[:10])
+  following = list(twitterGraph.values())
+  following_flattened = [node for sublist in following for node in sublist]
+  biggest100Influencers = get100BiggestInfluencers(following_flattened)
+  for i in range(100):
+      print("account id: " + str(biggest100Influencers[i].id)
+          + "; followers: " + str(biggest100Influencers[i].followers))
   
   
 path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'

@@ -2,45 +2,37 @@
 class heap:
   
     def __init__(self, L = None):
+        self.lst = []
         if L != None:
-            lst = L
-        else:
-            lst = []
+            self.lst = L
   
     def getLength(self):
         return len(self.lst)
     
-    def getValue(self, idx):
-        return self.lst[idx]
-    
-    def setValue(self, idx, newvalue):
-        self.lst[idx] = newvalue
-        return newvalue
-    
-    def insert(self, newvalue):
-        self.lst.append(newvalue)
+    def insert(self, newnode):
+        self.lst.append(newnode)
         self._siftdown(0, self.getLength() - 1)
     
     def extractMax(self):
-        endval = self.lst.pop()
+        endnode = self.lst.pop()
         if self.lst:
-            ret = self.getValue(0)
-            self.setValue(0, endval)
+            ret = self.lst[0]
+            self.lst[0] = endnode
             self._siftup(0)
             return ret
-        return endval
+        return endnode
     
-    def heappoppush(self, newvalue):
-        ret = self.getValue(0)
-        self.setValue(0, newvalue)
+    def heappoppush(self, newnode):
+        ret = self.lst[0]
+        self.lst[0] = newnode
         self._siftup(0)
         return ret
     
-    def heappushpop(self, newvalue):
-        if self.lst and self.getValue(0) < newvalue:
-            newvalue, self.lst[0] = self.lst[0], newvalue
+    def heappushpop(self, newnode):
+        if self.lst and self.lst[0].followers < newnode.followers:
+            newnode, self.lst[0] = self.lst[0], newnode
             self._siftup(0)
-        return newvalue
+        return newnode
     
     def heapify(self):
         n = self.getLength()
@@ -48,36 +40,63 @@ class heap:
             self._siftup(i)
     
     def _siftdown(self, startidx, idx):
-        newval = self.lst[idx]
+        newnode = self.lst[idx]
         # move up tree to root, moving passed nodes down until fitting newval
         while idx > startidx:
             pidx = (idx - 1) >> 1
-            parent = self.lst[pidx]
-            if parent < newval:
-                self.lst[idx] = parent
-                pos = pidx
+            parentnode = self.lst[pidx]
+            if parentnode.followers < newnode.followers:
+                self.lst[idx] = parentnode
+                idx = pidx
                 continue
             break
-        self.lst[pos] = newval
+        self.lst[idx] = newnode
     
     def _siftup(self, idx):
-        endidx = len(self.lst)
+        endidx = self.getLength()
         startidx = idx
-        newval = self.getValue(idx)
+        newnode = self.lst[idx]
         # move down the tree following the larger child until hitting leaf
         # leftmost child index
         cidx = 2 * idx + 1
         while cidx < endidx:
             # set cidx to index of larger child
             ridx = cidx + 1
-            if ridx < endidx and not self.getValue(ridx) < self.getValue(cidx):
+            if ridx < endidx and not self.lst[ridx].followers < self.lst[cidx].followers:
                 cidx = ridx
             # move larger child up tree
-            self.setValue(idx, self.getValue(cidx))
+            self.lst[idx] = self.lst[cidx]
             idx = cidx
             cidx = 2 * idx + 1
         # leaf at idx is empty, put newval there, and move it up tree to fitted
         # spot
-        self.setValue(idx, newval)
+        self.lst[idx] = newnode
         self._siftdown(startidx, idx)
+
+class node:
+    
+    def __init__(self, id = -1, followers = -1):
+        self.id = id
+        self.followers = followers
+        
+    def __str__(self):
+        return "id: " + str(self.id) + "; followers: " + str(self.followers)
+    
+    def __lt__(self, other):
+        return self.followers < other.followers
+    
+    def __le__(self, other):
+        return self.followers <= other.followers
+    
+    def __eq__(self, other):
+        return self.id == other.id
+    
+    def __ne__(self, other):
+        return self.id != other.id
+    
+    def __ge__(self, other):
+        return self.followers >= other.followers
+    
+    def __gt__(self, other):
+        return self.followers > other.followers
         
