@@ -1,5 +1,5 @@
 # from cpython.heapq
-class Heap:
+class heap:
   
     def __init__(self, L = None):
         if L != None:
@@ -40,7 +40,7 @@ class Heap:
         if self.lst and self.getValue(0) < newvalue:
             newvalue, self.lst[0] = self.lst[0], newvalue
             self._siftup(0)
-        return newitem
+        return newvalue
     
     def heapify(self):
         n = self.getLength()

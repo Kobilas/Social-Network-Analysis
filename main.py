@@ -35,10 +35,15 @@ def createGraphFromFile(filePath):
     else:
       egoGraph[ln[0]] = [ln[1]]
   return egoGraph
+
+#def get100BiggestInfluencers(L):
+    
     
 def main(filePath):
   twitterGraph = createGraphFromFile(filePath)
-  print(take(2, twitterGraph.items()))
+  print(take(1, twitterGraph.items()))
+  print(list(twitterGraph.values())[:10])
+  
   
 path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
 main(path)
