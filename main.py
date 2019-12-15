@@ -110,7 +110,9 @@ def getStronglyConnectedSubnetwork(connGraphDict):
                     # RecursionError, maximum recursion depth
                     # solution will be to not recurse on neighbors and just perform DFS
                     # on the dictionary
-                    #visitNode(neighbor)
+                    '''
+                    visitNode(neighbor)
+                    '''
                     if neighbor not in transposed.keys():
                         transposed[neighbor] = [idx]
                     elif idx not in transposed[neighbor]:
@@ -125,16 +127,22 @@ def getStronglyConnectedSubnetwork(connGraphDict):
     ret = {}
     subnetId = 0
     
+    print('assigning')
     def assignToSubnet(idx, netId):
         if visited[idx]:
             visited[idx] = False
             if idx not in ret:
                 ret[idx] = netId
+            # stack overflow here as well, going to omit this and add fix to loop outside function below
+            '''
             for vrtx in transposed[idx]:
                 assignToSubnet(vrtx, netId)
+            '''
     
     for nd in reversed(stack):
         assignToSubnet(nd, subnetId)
+        for neighbor in transposed[nd]:
+            assignToSubnet(neighbor, subnetId)
         subnetId += 1
     
     return ret
@@ -169,10 +177,11 @@ def main(filePath):
     for key, value in kosarajuRes.items():
         print(str(key) + ' : ' + str(value))
     print(take(10, kosarajuRes.items()))
-    sys.stdout.flush()
+    print('Strongly connected graphs: ' + str(max(kosarajuRes.values())))
     print('_-^-_ TASK 6 _-^-_')
     
     
      
-path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
+#path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
+path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/test.txt'
 main(path)
