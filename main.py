@@ -1,5 +1,10 @@
 from itertools import islice
 import structs
+import sys
+
+# default recursion depth is 1000
+# this is an attempt to solve the RecursionError in Kosaraju algorithm
+sys.setrecursionlimit(10**6)
 
 # nodeId.edges : The edges in the ego network for the node 'nodeId'. Edges are
 #   undirected for facebook, and directed (a follows b) for twitter and gplus.
@@ -87,7 +92,52 @@ def biggestConnectedGraph(graphDict, srcNd):
             maxg = tmp
     return maxg
 
-#def getStronglyConnectedSubnetwork():
+def getStronglyConnectedSubnetwork(connGraphDict):
+    visited = {}
+    for key, value in connGraphDict.items():
+        if key not in visited.keys():
+            visited[key] = False
+    transposed = {}
+    stack = []
+    
+    def visitNode(idx):
+        # same issue as above, not all the nodes referenced in the data
+        # can be found in the data
+        try:
+            if not visited[idx]:
+                visited[idx] = True
+                for neighbor in connGraphDict[idx]:
+                    # RecursionError, maximum recursion depth
+                    # solution will be to not recurse on neighbors and just perform DFS
+                    # on the dictionary
+                    #visitNode(neighbor)
+                    if neighbor not in transposed.keys():
+                        transposed[neighbor] = [idx]
+                    elif idx not in transposed[neighbor]:
+                        transposed[neighbor].append(idx)
+                stack.append(idx)
+        except KeyError:
+            pass
+    
+    for nd in connGraphDict.keys():
+        visitNode(nd)
+        
+    ret = {}
+    subnetId = 0
+    
+    def assignToSubnet(idx, netId):
+        if visited[idx]:
+            visited[idx] = False
+            if idx not in ret:
+                ret[idx] = netId
+            for vrtx in transposed[idx]:
+                assignToSubnet(vrtx, netId)
+    
+    for nd in reversed(stack):
+        assignToSubnet(nd, subnetId)
+        subnetId += 1
+    
+    return ret
     
 def main(filePath):
     # Task 2
@@ -113,7 +163,15 @@ def main(filePath):
     for key in twitterGraph:
         if key not in bfsRes:
             print(str(key))
+    sys.stdout.flush()
     print('_-^-_ TASK 5 _-^-_')
+    kosarajuRes = getStronglyConnectedSubnetwork(bfsRes)
+    for key, value in kosarajuRes.items():
+        print(str(key) + ' : ' + str(value))
+    print(take(10, kosarajuRes.items()))
+    sys.stdout.flush()
+    print('_-^-_ TASK 6 _-^-_')
+    
     
      
 path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
