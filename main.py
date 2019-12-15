@@ -80,28 +80,41 @@ def biggestConnectedGraph(graphDict, srcNd):
                         if not graphDict[graphDict[nd][1][i]][0]:
                             q.append(graphDict[nd][1][i])
                             graphDict[graphDict[nd][1][i]][0] = True
-                    except KeyError as e:
+                    except KeyError:
                         # print(repr(e))
                         continue
         if len(tmp) > len(maxg):
             maxg = tmp
     return maxg
+
+#def getStronglyConnectedSubnetwork():
     
 def main(filePath):
+    # Task 2
+    print('_-^-_ TASK 2 _-^-_')
     twitterGraph = createGraphFromFile(filePath)
     print(take(1, twitterGraph.items()))
     following = list(twitterGraph.values())
     following_flattened = [node for sublist in following for node in sublist]
+    # Task 3
+    print('_-^-_ TASK 3 _-^-_')
     biggest100Influencers = get100BiggestInfluencers(following_flattened)
     for i in range(100):
         print(biggest100Influencers[i])
+    # Task 4
+    print('_-^-_ TASK 4 _-^-_')
     bfsRes = biggestConnectedGraph(twitterGraph, 214328887)
+    print(take(1, bfsRes.items()))
     print('Original graph length: ' + str(len(twitterGraph)))
     print('Largest connected graph length: ' + str(len(bfsRes)))
+    # the below loop should only produce one key that is not connected to the
+    # large connected graph referenced above
     print('Unconnected nodes:')
     for key in twitterGraph:
         if key not in bfsRes:
-            print(str(key), end = ' ')
+            print(str(key))
+    print('_-^-_ TASK 5 _-^-_')
+    
      
 path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
 main(path)
