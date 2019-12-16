@@ -127,26 +127,35 @@ def getStronglyConnectedSubnetwork(connGraphDict):
     ret = {}
     subnetId = 0
     
-    print('assigning')
     def assignToSubnet(idx, netId):
         if visited[idx]:
             visited[idx] = False
             if idx not in ret:
                 ret[idx] = netId
-            # stack overflow here as well, going to omit this and add fix to loop outside function below
-            '''
-            for vrtx in transposed[idx]:
-                assignToSubnet(vrtx, netId)
-            '''
+                for vrtx in transposed[idx]:
+                    if vrtx not in ret:
+                        ret[vrtx] = netId
+                return True
+            else:
+                # stack overflow here as well, going to omit this and add fix to loop outside function below
+                '''
+                for vrtx in transposed[idx]:
+                    assignToSubnet(vrtx, netId)
+                '''
+                for vrtx in transposed[idx]:
+                    if vrtx not in ret:
+                        ret[vrtx] = ret[idx]
+                return False
+        return False
     
     for nd in reversed(stack):
-        assignToSubnet(nd, subnetId)
-        for neighbor in transposed[nd]:
-            assignToSubnet(neighbor, subnetId)
-        subnetId += 1
+        if assignToSubnet(nd, subnetId):
+            subnetId += 1
     
     return ret
-    
+
+
+
 def main(filePath):
     # Task 2
     print('_-^-_ TASK 2 _-^-_')
@@ -170,18 +179,26 @@ def main(filePath):
     print('Unconnected nodes:')
     for key in twitterGraph:
         if key not in bfsRes:
-            print(str(key))
+            print(str(key), end=' ')
     sys.stdout.flush()
-    print('_-^-_ TASK 5 _-^-_')
+    print('\n_-^-_ TASK 5 _-^-_')
     kosarajuRes = getStronglyConnectedSubnetwork(bfsRes)
-    for key, value in kosarajuRes.items():
-        print(str(key) + ' : ' + str(value))
-    print(take(10, kosarajuRes.items()))
+    print(take(100, kosarajuRes.items()))
     print('Strongly connected graphs: ' + str(max(kosarajuRes.values())))
+    print('Nodes contained in subnetwork 4: ')
+    stronglyConnectedCntDict = {}
+    for key, value in kosarajuRes.items():
+        if value == 4:
+            print(str(key), end=' ')
+        if value not in stronglyConnectedCntDict.keys():
+            stronglyConnectedCntDict[value] = 0
+        else:
+            stronglyConnectedCntDict[value] += 1
+    print('\nStrongly connected component with most nodes: ' + str(stronglyConnectedCntDict[max(stronglyConnectedCntDict.values())]) + ' with ' + str(max(stronglyConnectedCntDict.values())) + ' nodes')
     print('_-^-_ TASK 6 _-^-_')
     
     
      
-#path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
-path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/test.txt'
+path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
+#path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/test.txt'
 main(path)
