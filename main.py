@@ -154,7 +154,31 @@ def getStronglyConnectedSubnetwork(connGraphDict):
     
     return ret
 
-
+def getKLenRecommendationChain(graphDict, ndId0, ndId1, k):
+    if k <= 0:
+        return 0
+    if k == 1:
+        return 1
+    if k == 2:
+        cnt = 0
+        for neighbor in graphDict[ndId1]:
+            if neighbor == ndId1:
+                cnt += 1
+        return cnt
+    res = [[] for i in range(k - 1)]
+    res[0] = [nd for nd in graphDict[ndId0]]
+    for i in range(1, len(res)):
+        for j in range(len(res[i-1])):
+            try:
+                for nd in graphDict[res[i-1][j]]:
+                    res[i].append(nd)
+            except KeyError:
+                continue
+    cnt = 0
+    for nd in res[k-2]:
+        if nd == ndId1:
+            cnt += 1
+    return cnt
 
 def main(filePath):
     # Task 2
@@ -196,8 +220,7 @@ def main(filePath):
             stronglyConnectedCntDict[value] += 1
     print('\nStrongly connected component with most nodes: ' + str(stronglyConnectedCntDict[max(stronglyConnectedCntDict.values())]) + ' with ' + str(max(stronglyConnectedCntDict.values())) + ' nodes')
     print('_-^-_ TASK 6 _-^-_')
-    
-    
+    print('Number of 3-length recommendation chains from 439779382 to 127003249: ' + str(getKLenRecommendationChain(bfsRes, 439779382, 127003249, 3)))
      
 path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/twitter_combined.txt'
 #path = 'C:/Users/Matt/Documents/GitHub/Social-Network-Analysis/test.txt'
