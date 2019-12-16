@@ -21,28 +21,35 @@ sys.setrecursionlimit(10**6)
 #   This file has been anonymized for facebook users, since the names of the
 #   features would reveal private data
 
+# from stackoverflow
 def take(n, iterable):
     # Return first n items of the dictionary as a list
     return list(islice(iterable, n))
 
+# creates V:E dictionary from file
 def createGraphFromFile(filePath):
     fp = open(filePath, 'r')
     egoGraph = {}
     for line in fp:
+        # fix the line of text in file
         ln = line.split(' ')
         # Removing whitespaces from text in file
         ln[1] = ln[1].replace('\n', '').strip()
         # Converting to number will make it easier to store in memory
         ln[0] = int(ln[0])
         ln[1] = int(ln[1])
+        # add to dictionary or append to vertex's list
         if ln[0] in egoGraph:
             egoGraph[ln[0]].append(ln[1])
         else:
             egoGraph[ln[0]] = [ln[1]]
     return egoGraph
 
+# returns the 100 nodes with highest in degree
+# this is done using a heap and 100 extractions
 def get100BiggestInfluencers(L):
     followerCount = {}
+    # count the number of followers each node has by adding them to dictionary and incrementing whenever seen
     for account in L:
         if account in followerCount:
             followerCount[account] += 1
@@ -56,6 +63,8 @@ def get100BiggestInfluencers(L):
         ret.append(hp.extractMax())
     return ret
 
+# returns the largest connected graph based on the dictionary, starting the BFS at source node
+# performed with breadth-first search
 def biggestConnectedGraph(graphDict, srcNd):
     # adding True/False for visited/not visited to each node in graphDict
     for key in graphDict:
@@ -92,12 +101,16 @@ def biggestConnectedGraph(graphDict, srcNd):
             maxg = tmp
     return maxg
 
+# returns strongly connected subnetwork components based on the graph using Kosaraju's algorithm
 def getStronglyConnectedSubnetwork(connGraphDict):
+    # DFS once and mark nodes visisted
     visited = {}
     for key, value in connGraphDict.items():
         if key not in visited.keys():
             visited[key] = False
+    # transposed graph
     transposed = {}
+    # visited node stack
     stack = []
     
     def visitNode(idx):
@@ -113,6 +126,7 @@ def getStronglyConnectedSubnetwork(connGraphDict):
                     '''
                     visitNode(neighbor)
                     '''
+                    # invert the graph here
                     if neighbor not in transposed.keys():
                         transposed[neighbor] = [idx]
                     elif idx not in transposed[neighbor]:
@@ -121,17 +135,21 @@ def getStronglyConnectedSubnetwork(connGraphDict):
         except KeyError:
             pass
     
+    # visit each node in the graph's keys
     for nd in connGraphDict.keys():
         visitNode(nd)
         
     ret = {}
     subnetId = 0
     
+    # assign the node to a subnet id in a dictionary
     def assignToSubnet(idx, netId):
         if visited[idx]:
             visited[idx] = False
             if idx not in ret:
                 ret[idx] = netId
+                # for each neighboring vertex, set the id, but do not set visited so we visit those neighbors later on
+                # iterative fashion to avoid overflow errors
                 for vrtx in transposed[idx]:
                     if vrtx not in ret:
                         ret[vrtx] = netId
@@ -142,19 +160,24 @@ def getStronglyConnectedSubnetwork(connGraphDict):
                 for vrtx in transposed[idx]:
                     assignToSubnet(vrtx, netId)
                 '''
+                # for each neighboring vertex, add it to the subnet of the original vertex since it is reachable
                 for vrtx in transposed[idx]:
                     if vrtx not in ret:
                         ret[vrtx] = ret[idx]
                 return False
         return False
     
+    # for each node in the visitation stack
+    # assign it to a subnet and increment the subnetid only if that node did not exist in a specifiec subnet already
     for nd in reversed(stack):
         if assignToSubnet(nd, subnetId):
             subnetId += 1
     
     return ret
 
+# returns the number of K-length chains there are between node id 0 and node id 1
 def getKLenRecommendationChain(graphDict, ndId0, ndId1, k):
+    # edge cases
     if k <= 0:
         return 0
     if k == 1:
@@ -165,26 +188,39 @@ def getKLenRecommendationChain(graphDict, ndId0, ndId1, k):
             if neighbor == ndId1:
                 cnt += 1
         return cnt
+    # dynamic programming list for determining possible nodes in chain
     res = [[] for i in range(k - 1)]
+    # first list in list is of the neighbors for node id 0
     res[0] = [nd for nd in graphDict[ndId0]]
+    # visit the nodes in each list of lists, starting with node id 0's neighbors
     for i in range(1, len(res)):
+        # build the next list of nodes, by getting the neighbors of each node in the previous list of lists and adding those to the next list
+        # those will be iterated over in the next loop
+        # can be improved by utilizing a smaller array than res, reuse lists between loops possibly
         for j in range(len(res[i-1])):
             try:
                 for nd in graphDict[res[i-1][j]]:
                     res[i].append(nd)
             except KeyError:
                 continue
+    # count the number of times node id 1 shows up in the final list of lists, which contains the destination node
     cnt = 0
     for nd in res[k-2]:
+        # if the node is node id 1, increment count
         if nd == ndId1:
             cnt += 1
     return cnt
 
+# main method for testing and running all code
+# organized in order of task, starting with task 2, the first coding part
 def main(filePath):
     # Task 2
     print('_-^-_ TASK 2 _-^-_')
+    # create graph from the input file I chose
     twitterGraph = createGraphFromFile(filePath)
+    # print one of the V:E relationships
     print(take(1, twitterGraph.items()))
+
     following = list(twitterGraph.values())
     following_flattened = [node for sublist in following for node in sublist]
     # Task 3
